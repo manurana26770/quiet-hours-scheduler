@@ -204,7 +204,7 @@ All tables have RLS enabled with policies ensuring users can only access their o
 
 3. **Deploy**:
    - Vercel will automatically deploy on every push to main branch
-   - CRON jobs will be automatically configured
+   - Set up external CRON service (see CRON-SETUP-GUIDE.md)
 
 ### Environment Variables for Production
 
@@ -219,11 +219,11 @@ GMAIL_APP_PASSWORD=your_app_password
 
 ## CRON Job Configuration
 
-The application uses Vercel CRON jobs for email reminders:
+The application uses external CRON services for email reminders:
 
 - **Schedule**: Every 5 minutes (`*/5 * * * *`)
 - **Endpoint**: `/api/cron`
-- **Security**: Protected with CRON_SECRET
+- **Service**: cron-job.org (free) or UptimeRobot
 - **Functionality**: Sends reminders 10 minutes before study blocks
 
 ## Troubleshooting

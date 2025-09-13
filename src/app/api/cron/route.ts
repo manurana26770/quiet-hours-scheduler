@@ -30,15 +30,20 @@ export async function GET(request: NextRequest) {
     // Verify this is a legitimate cron request (production security)
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
+    const userAgent = request.headers.get('user-agent')
+    
+    // Allow requests from cron-job.org and other known cron services
+    const isKnownCronService = userAgent?.includes('cron-job.org') || 
+                              userAgent?.includes('cron-job')
     
     // For development/testing, allow requests without secret
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      // Only enforce in production
-      if (process.env.NODE_ENV === 'production') {
+      // Allow known cron services or development mode
+      if (process.env.NODE_ENV === 'production' && !isKnownCronService) {
         console.log('Cron request rejected - unauthorized')
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       } else {
-        console.log('Development mode: Allowing cron request without secret')
+        console.log('Development mode or known cron service: Allowing request')
       }
     }
 
