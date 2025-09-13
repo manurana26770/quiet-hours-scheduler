@@ -42,13 +42,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single()
 
       if (error) {
-        console.error('Error fetching profile:', error)
         return null
       }
 
       return data
     } catch (error) {
-      console.error('Error fetching profile:', error)
       return null
     }
   }
@@ -78,7 +76,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setProfile(userProfile)
           }
         } catch (error) {
-          console.error('Error fetching profile in background:', error)
           // Don't fail the auth setup if profile fetch fails
         }
       } else {
@@ -91,7 +88,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set a timeout to prevent infinite loading
     loadingTimeout = setTimeout(() => {
       if (mounted) {
-        console.warn('Auth loading timeout - setting loading to false')
         setLoading(false)
       }
     }, 5000) // Reduced to 5 seconds
@@ -112,7 +108,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const { session, error } = data
         
           if (error) {
-            console.error('Error getting session:', error)
             if (mounted) {
               clearTimeout(loadingTimeout)
               setLoading(false)
@@ -123,7 +118,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await completeAuthSetup(session)
         } else {
           // Handle timeout case
-          console.error('Session fetch timeout')
           if (mounted) {
             clearTimeout(loadingTimeout)
             setLoading(false)
@@ -131,7 +125,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       })
       .catch((error) => {
-        console.error('Error in getSession:', error)
         if (mounted) {
           clearTimeout(loadingTimeout)
           setLoading(false)

@@ -32,9 +32,13 @@ export async function GET(request: NextRequest) {
     const cronSecret = process.env.CRON_SECRET
     const userAgent = request.headers.get('user-agent')
     
+    // Log basic request info (safe for production)
+    console.log('CRON request received')
+    
     // Allow requests from cron-job.org and other known cron services
     const isKnownCronService = userAgent?.includes('cron-job.org') || 
-                              userAgent?.includes('cron-job')
+                              userAgent?.includes('cron-job') ||
+                              userAgent?.includes('UptimeRobot')
     
     // For development/testing, allow requests without secret
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
@@ -45,6 +49,12 @@ export async function GET(request: NextRequest) {
       } else {
         console.log('Development mode or known cron service: Allowing request')
       }
+    } else if (!cronSecret) {
+      // No secret configured, allow all requests
+      console.log('No CRON_SECRET configured, allowing request')
+    } else {
+      // Valid secret provided
+      console.log('Valid CRON_SECRET provided, allowing request')
     }
 
     // Get current time
@@ -57,12 +67,13 @@ export async function GET(request: NextRequest) {
     // 2. Reminder hasn't been sent yet
     // 3. Start time is in the future (block hasn't started yet)
     
+    // Get all active blocks first, then filter by time in JavaScript
+    // This handles timezone issues better than database queries
     const { data: quietBlocks, error: fetchError } = await supabase
       .from('quiet_blocks')
       .select('*')
       .eq('is_active', true)
       .eq('reminder_sent', false)
-      .gt('start_time', nowISO)
 
     if (fetchError) {
       console.error('Error fetching quiet blocks:', fetchError)
@@ -87,11 +98,23 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Filter out expired blocks from reminder processing
+    // Filter blocks that are in the future and need reminders
     const activeBlocks = (quietBlocks || []).filter(block => {
+      const startTime = new Date(block.start_time)
       const endTime = new Date(block.end_time)
-      return endTime >= now
+      
+      // Block should be in the future (not started yet) and not expired
+      const isInFuture = startTime > now
+      const isNotExpired = endTime >= now
+      
+      // Log block processing (safe for production)
+      console.log(`Processing block ${block.id}: ${isInFuture && isNotExpired ? 'Ready' : 'Not ready'}`)
+      
+      return isInFuture && isNotExpired
     })
+
+    // Log summary (safe for production)
+    console.log(`Found ${activeBlocks.length} blocks needing reminders out of ${quietBlocks?.length || 0} total blocks`)
 
     if (activeBlocks.length === 0) {
       return NextResponse.json({ 
@@ -99,7 +122,12 @@ export async function GET(request: NextRequest) {
         timestamp: nowISO,
         checked: quietBlocks?.length || 0,
         expired: expiredBlocks.length,
-        sent: 0
+        sent: 0,
+        debug: {
+          totalBlocks: quietBlocks?.length || 0,
+          activeBlocks: activeBlocks.length,
+          expiredBlocks: expiredBlocks.length
+        }
       })
     }
 
@@ -112,14 +140,8 @@ export async function GET(request: NextRequest) {
         const startTime = new Date(block.start_time)
         const reminderTime = new Date(startTime.getTime() - 10 * 60 * 1000) // 10 minutes before
         
-        console.log(`Processing block ${block.id}:`, {
-          title: block.title,
-          startTime: startTime.toISOString(),
-          reminderTime: reminderTime.toISOString(),
-          currentTime: now.toISOString(),
-          timeDiff: Math.abs(now.getTime() - reminderTime.getTime()),
-          isBeforeStart: now < startTime
-        })
+        // Log block processing (safe for production)
+        console.log(`Processing block ${block.id}: ${block.title}`)
         
         // Check if it's time to send the reminder
         // We send the reminder if current time is within 5 minutes of the reminder time
@@ -173,27 +195,18 @@ export async function GET(request: NextRequest) {
               errorCount++
             } else {
               sentCount++
-              console.log(`✅ Reminder sent to ${userEmail} for block: ${block.title}`)
+              console.log(`✅ Reminder sent for block: ${block.title}`)
             }
           } catch (emailError) {
             console.error(`❌ Failed to send email for block ${block.id}:`, emailError)
-            console.error(`Email error details:`, {
-              blockId: block.id,
-              userEmail,
-              userName,
-              blockTitle: block.title,
-              error: emailError
-            })
+            // Log error without sensitive details
+            console.error(`Email failed for block ${block.id}`)
             errorCount++
           }
         } else {
-          console.log(`⏰ Block ${block.id} not ready for reminder yet:`, {
-            timeDiff: timeDiff,
-            fiveMinutesInMs: fiveMinutesInMs,
-            isWithinTimeWindow: timeDiff <= fiveMinutesInMs,
-            isBeforeStart: now < startTime,
-            reason: timeDiff > fiveMinutesInMs ? 'Too early/late' : 'Block already started'
-          })
+          // Log timing info (safe for production)
+          const reason = timeDiff > fiveMinutesInMs ? 'Too early/late' : 'Block already started'
+          console.log(`Block ${block.id} not ready: ${reason}`)
         }
       } catch (error) {
         console.error(`Error processing block ${block.id}:`, error)

@@ -65,7 +65,7 @@ function DashboardContent() {
           .in('id', expiredIds)
 
         if (updateError) {
-          console.error('Error deactivating expired blocks:', updateError)
+          // Silently handle expired block deactivation errors
         }
       }
 
@@ -78,7 +78,6 @@ function DashboardContent() {
       setQuietBlocks(activeBlocks)
       setHasFetched(true)
     } catch (err) {
-      console.error('Fetch error details:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch quiet blocks')
     } finally {
       if (showLoading) {

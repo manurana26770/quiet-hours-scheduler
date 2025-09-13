@@ -46,18 +46,13 @@ function CreateContent() {
     setLoading(true)
     setError('')
     
-    console.log('Creating quiet block for user:', user.id)
-    
     // Ensure we have a valid session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     if (sessionError || !session) {
-      console.error('Session error:', sessionError)
       setError('Authentication error. Please log in again.')
       setLoading(false)
       return
     }
-    
-    console.log('User session confirmed:', session.user.id)
 
     try {
       // Validate form
@@ -86,8 +81,7 @@ function CreateContent() {
         .eq('is_active', true)
 
       if (checkError) {
-        console.error('Error checking existing blocks:', checkError)
-        throw new Error(`Failed to check existing blocks: ${checkError.message || JSON.stringify(checkError)}`)
+        throw new Error(`Failed to check existing blocks: ${checkError.message || 'Unknown error'}`)
       }
 
       // Check for overlaps
@@ -114,25 +108,18 @@ function CreateContent() {
         reminder_sent: false
       }
       
-      console.log('Inserting quiet block with data:', insertData)
-      
       const { data: insertResult, error: insertError } = await supabase
         .from('quiet_blocks')
         .insert(insertData)
         .select()
 
       if (insertError) {
-        console.error('Error inserting quiet block:', insertError)
-        throw new Error(`Failed to create quiet block: ${insertError.message || JSON.stringify(insertError)}`)
+        throw new Error(`Failed to create quiet block: ${insertError.message || 'Unknown error'}`)
       }
-      
-      console.log('Successfully created quiet block:', insertResult)
 
       // Redirect to dashboard
       router.push('/dashboard')
     } catch (err) {
-      console.error('Error creating quiet block:', err)
-      
       // Handle different error types
       let errorMessage = 'Failed to create quiet block'
       
@@ -147,7 +134,7 @@ function CreateContent() {
         } else if ('details' in err) {
           errorMessage = String(err.details)
         } else {
-          errorMessage = JSON.stringify(err)
+          errorMessage = 'Unknown error occurred'
         }
       }
       

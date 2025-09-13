@@ -216,7 +216,7 @@ export async function sendReminderEmail({
 
     return { success: true, messageId: info.messageId }
   } catch (error) {
-    console.error(`❌ Failed to send email via Gmail SMTP to ${to}:`, error)
+    console.error('Failed to send email via Gmail SMTP')
     throw error
   }
 }
