@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-serif: var(--font-playfair);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography improvements */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-playfair), Georgia, "Times New Roman", serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+/* Elegant button styling */
+button {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Form elements */
+input, textarea, select {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-weight: 500;
+  color: #1f2937; /* gray-800 - darker text color */
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus, textarea:focus, select:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+/* Placeholder styling - darker and more visible */
+input::placeholder, textarea::placeholder {
+  color: #374151; /* gray-700 - much darker than default */
+  opacity: 1;
+  font-weight: 500;
+}
+
+input:focus::placeholder, textarea:focus::placeholder {
+  color: #6b7280; /* gray-500 - slightly lighter when focused */
+  opacity: 0.9;
+}
+
+/* Webkit placeholder styling for better browser support */
+input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {
+  color: #374151;
+  opacity: 1;
+  font-weight: 500;
+}
+
+input::-moz-placeholder, textarea::-moz-placeholder {
+  color: #374151;
+  opacity: 1;
+  font-weight: 500;
+}
+
+input:-ms-input-placeholder, textarea:-ms-input-placeholder {
+  color: #374151;
+  opacity: 1;
+  font-weight: 500;
+}
+
+/* Form input enhancements */
+.form-input {
+  color: #1f2937 !important; /* gray-800 */
+  font-weight: 500;
+}
+
+.form-input::placeholder {
+  color: #374151 !important; /* gray-700 */
+  font-weight: 500;
+  opacity: 1;
+}
+
+.form-input:focus {
+  color: #111827 !important; /* gray-900 - even darker when focused */
+}
+
+.form-input:focus::placeholder {
+  color: #6b7280 !important; /* gray-500 */
+  opacity: 0.8;
+}
+
+/* Code and monospace */
+code, pre, .font-mono {
+  font-family: var(--font-jetbrains-mono), "Fira Code", "Cascadia Code", "SF Mono", Monaco, "Inconsolata", "Roboto Mono", monospace;
+  font-feature-settings: "liga" 1, "calt" 1;
+}
