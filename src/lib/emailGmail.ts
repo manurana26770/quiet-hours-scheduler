@@ -30,6 +30,7 @@ export function createReminderEmailTemplate({
   reminderMinutes: number
 }) {
   const startTimeFormatted = startTime.toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -40,6 +41,7 @@ export function createReminderEmailTemplate({
   })
   
   const endTimeFormatted = endTime.toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
     hour: 'numeric',
     minute: '2-digit',
     hour12: true
@@ -153,8 +155,8 @@ export function createReminderEmailTemplate({
       This is a friendly reminder that your quiet block is starting soon:
       
       ${blockName}
-      Start Time: ${startTimeFormatted}
-      End Time: ${endTimeFormatted}
+      Start Time (IST): ${startTimeFormatted}
+      End Time (IST): ${endTimeFormatted}
       ${description ? `Description: ${description}` : ''}
       ${location ? `Location: ${location}` : ''}
       ${category ? `Category: ${category.charAt(0).toUpperCase() + category.slice(1)}` : ''}
